@@ -1,136 +1,180 @@
-import { useState } from "react";
-import { PresentationLayout } from "@/components/PresentationLayout";
-import { HeroSlide } from "@/components/slides/HeroSlide";
-import { ContentSlide } from "@/components/slides/ContentSlide";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
+import { BookOpen, Award, Users, Clock, ArrowRight } from "lucide-react";
+import heroImage from "@/assets/cosmetic-hero.jpg";
 
 const Index = () => {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const navigate = useNavigate();
 
-  const slides = [
-    {
-      id: 1,
-      title: "Welcome to Cosmetic Production",
-      type: "intro" as const,
-      content: (
-        <HeroSlide onGetStarted={() => setCurrentSlideIndex(1)} />
-      )
-    },
-    {
-      id: 2,
-      title: "Course Introduction",
-      type: "content" as const,
-      content: (
-        <ContentSlide
-          title="Introduction to Cosmetic Science"
-          subtitle="Understanding the fundamentals of cosmetic formulation and production"
-          learning_objectives={["Basic Chemistry", "Safety Standards", "Product Development", "Quality Control"]}
-          content={{
-            type: "text",
-            data: "Cosmetic science combines chemistry, biology, and engineering to create products that enhance appearance and maintain skin health. This comprehensive course will guide you through every aspect of cosmetic production, from initial formulation to final packaging."
-          }}
-        />
-      )
-    },
-    {
-      id: 3,
-      title: "Key Ingredients",
-      type: "content" as const,
-      content: (
-        <ContentSlide
-          title="Essential Cosmetic Ingredients"
-          subtitle="Understanding the building blocks of cosmetic formulations"
-          learning_objectives={["Active Ingredients", "Preservatives", "Emulsifiers", "Colorants"]}
-          content={{
-            type: "grid",
-            data: [
-              {
-                title: "Active Ingredients",
-                description: "Components that provide the primary benefit - vitamins, peptides, acids, and botanical extracts"
-              },
-              {
-                title: "Emulsifiers",
-                description: "Allow oil and water to blend smoothly - lecithin, polysorbates, and stearic acid"
-              },
-              {
-                title: "Preservatives",
-                description: "Prevent microbial growth and extend shelf life - parabens, phenoxyethanol, and natural alternatives"
-              },
-              {
-                title: "Thickeners",
-                description: "Control texture and viscosity - carbomers, xanthan gum, and natural gums"
-              }
-            ]
-          }}
-        />
-      )
-    },
-    {
-      id: 4,
-      title: "Production Process",
-      type: "content" as const,
-      content: (
-        <ContentSlide
-          title="Manufacturing Process"
-          subtitle="Step-by-step guide to cosmetic production"
-          learning_objectives={["Mixing Techniques", "Temperature Control", "Quality Testing", "Packaging"]}
-          content={{
-            type: "steps",
-            data: [
-              {
-                title: "Ingredient Preparation",
-                description: "Weigh and prepare all raw materials according to the formulation. Ensure proper temperature and pH conditions."
-              },
-              {
-                title: "Phase Mixing",
-                description: "Combine oil and water phases separately, then blend together using appropriate mixing equipment."
-              },
-              {
-                title: "Homogenization",
-                description: "Use high-speed mixing or homogenizers to create a smooth, uniform texture without air bubbles."
-              },
-              {
-                title: "Quality Control",
-                description: "Test pH, viscosity, stability, and microbial contamination before packaging."
-              },
-              {
-                title: "Packaging & Labeling",
-                description: "Fill into sterile containers and apply accurate labeling with ingredient lists and usage instructions."
-              }
-            ]
-          }}
-        />
-      )
-    },
-    {
-      id: 5,
-      title: "Safety & Regulations",
-      type: "content" as const,
-      content: (
-        <ContentSlide
-          title="Safety Standards & Regulations"
-          subtitle="Ensuring compliance and consumer safety in cosmetic production"
-          learning_objectives={["FDA Guidelines", "EU Regulations", "Safety Testing", "Documentation"]}
-          content={{
-            type: "list",
-            data: [
-              "FDA cosmetic regulations require proper labeling and ingredient disclosure",
-              "EU cosmetic regulation demands safety assessments and CPNP notification",
-              "Patch testing and stability studies ensure product safety and efficacy",
-              "Good Manufacturing Practices (GMP) maintain quality and consistency",
-              "Proper documentation tracks every batch from ingredients to final product",
-              "Regular training ensures all personnel understand safety protocols"
-            ]
-          }}
-        />
-      )
+  useEffect(() => {
+    // Check authentication
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
     }
-  ];
-
+  };
   return (
-    <PresentationLayout 
-      slides={slides}
-      onSlideChange={setCurrentSlideIndex}
-    />
+    <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src={heroImage}
+            alt="Cosmetic Production"
+            className="w-full h-full object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 to-background/70" />
+        </div>
+        
+        <div className="relative container mx-auto px-4 py-20 text-center">
+          <Badge variant="outline" className="mb-6">
+            Professional Certification Course
+          </Badge>
+          
+          <h1 className="text-4xl md:text-6xl font-bold text-primary mb-6">
+            Master Cosmetic Production
+          </h1>
+          
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+            Learn professional cosmetic manufacturing from industry experts. 
+            Complete hands-on modules, pass tests, and earn your certification.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <Button size="lg" onClick={handleGetStarted} className="text-lg px-8">
+              {user ? "Continue Learning" : "Start Your Journey"}
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            
+            {!user && (
+              <Button variant="outline" size="lg" onClick={() => navigate("/auth")}>
+                Sign In
+              </Button>
+            )}
+          </div>
+          
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">4</div>
+              <div className="text-sm text-muted-foreground">Modules</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">8</div>
+              <div className="text-sm text-muted-foreground">Hours</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">4</div>
+              <div className="text-sm text-muted-foreground">Tests</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-primary">1</div>
+              <div className="text-sm text-muted-foreground">Certificate</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold text-primary mb-4">
+            What You'll Learn
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Comprehensive training covering every aspect of cosmetic production
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
+              <CardTitle>Cosmetic Science</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Learn the fundamentals of chemistry, biology, and engineering in cosmetics
+              </CardDescription>
+            </CardContent>
+          </Card>
+          
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <Award className="h-12 w-12 text-primary mx-auto mb-4" />
+              <CardTitle>Key Ingredients</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Master active ingredients, emulsifiers, preservatives, and thickeners
+              </CardDescription>
+            </CardContent>
+          </Card>
+          
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <Users className="h-12 w-12 text-primary mx-auto mb-4" />
+              <CardTitle>Manufacturing</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                Step-by-step production process from mixing to packaging
+              </CardDescription>
+            </CardContent>
+          </Card>
+          
+          <Card className="text-center hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <Clock className="h-12 w-12 text-primary mx-auto mb-4" />
+              <CardTitle>Safety & Regulations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>
+                FDA guidelines, EU regulations, and quality control standards
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-primary/5">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-primary mb-4">
+            Ready to Start Learning?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join thousands of professionals who have advanced their careers with our certification program
+          </p>
+          <Button size="lg" onClick={handleGetStarted} className="text-lg px-8">
+            {user ? "Go to Dashboard" : "Create Free Account"}
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+      </section>
+    </div>
   );
 };
 
