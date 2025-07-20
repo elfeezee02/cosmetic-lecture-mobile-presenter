@@ -47,7 +47,7 @@ export const MobileLayout = ({ children, showBackButton = false, backTo = "/dash
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t">
-        <div className="grid grid-cols-3 h-16">
+        <div className="grid grid-cols-2 h-16">
           <Button
             variant="ghost"
             className={`flex flex-col items-center justify-center gap-1 h-full rounded-none ${
@@ -64,22 +64,24 @@ export const MobileLayout = ({ children, showBackButton = false, backTo = "/dash
             className={`flex flex-col items-center justify-center gap-1 h-full rounded-none ${
               location.pathname.startsWith("/course") ? "text-primary bg-primary/5" : "text-muted-foreground"
             }`}
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/course/1")}
           >
             <BookOpen className="h-5 w-5" />
             <span className="text-xs">Courses</span>
           </Button>
-          
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center justify-center gap-1 h-full rounded-none ${
-              isActive("/profile") ? "text-primary bg-primary/5" : "text-muted-foreground"
-            }`}
-            onClick={() => navigate("/dashboard")}
-          >
-            <User className="h-5 w-5" />
-            <span className="text-xs">Profile</span>
-          </Button>
+
+          {location.pathname === "/dashboard" && (
+            <Button
+              variant="ghost"
+              className={`flex flex-col items-center justify-center gap-1 h-full rounded-none ${
+                isActive("/certificate") ? "text-primary bg-primary/5" : "text-muted-foreground"
+              }`}
+              onClick={() => navigate("/certificate")}
+            >
+              <User className="h-5 w-5" />
+              <span className="text-xs">Certificate</span>
+            </Button>
+          )}
         </div>
       </nav>
     </div>
