@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@supabase/supabase-js";
-import { ArrowLeft, ArrowRight, CheckCircle, Award } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle, Award, Play } from "lucide-react";
 import { ContentSlide } from "@/components/slides/ContentSlide";
 import { TestComponent } from "@/components/TestComponent";
 import { CertificateComponent } from "@/components/CertificateComponent";
+import { MobileLayout } from "@/components/MobileLayout";
 
 interface Module {
   id: string;
@@ -298,29 +299,26 @@ const Course = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <Badge variant="outline">
-              Module {currentModule.order_index} of {modules.length}
-            </Badge>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Course Progress</span>
-              <span className="text-sm text-muted-foreground">{Math.round(getOverallProgress())}%</span>
+    <MobileLayout 
+      showBackButton={true} 
+      backTo="/dashboard"
+      title={`Module ${currentModule.order_index}/${modules.length}`}
+    >
+      <div className="p-4 space-y-4">
+        {/* Progress Header */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Course Progress</span>
+                <span className="text-sm text-muted-foreground">{Math.round(getOverallProgress())}%</span>
+              </div>
+              <Progress value={getOverallProgress()} className="h-2" />
             </div>
-            <Progress value={getOverallProgress()} className="h-2" />
-          </div>
-        </div>
-      </header>
+          </CardContent>
+        </Card>
 
-      <main className="container mx-auto px-4 py-8">
+        {/* Module Content */}
         <ContentSlide
           title={currentModule.title}
           subtitle={currentModule.description}
@@ -328,59 +326,80 @@ const Course = () => {
           content={currentModule.content}
         />
 
-        <div className="mt-8 flex justify-between items-center">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentModuleIndex(prev => Math.max(0, prev - 1))}
-            disabled={currentModuleIndex === 0}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous Module
-          </Button>
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          {/* Mark Complete Button */}
+          {!isModuleCompleted(currentModule.id) && (
+            <Button 
+              onClick={markModuleComplete}
+              className="w-full"
+              size="lg"
+            >
+              <CheckCircle className="h-5 w-5 mr-2" />
+              Mark as Complete
+            </Button>
+          )}
 
-          <div className="flex gap-4">
-            {!isModuleCompleted(currentModule.id) && (
-              <Button onClick={markModuleComplete}>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Mark as Complete
-              </Button>
-            )}
+          {/* Test Button */}
+          {isModuleCompleted(currentModule.id) && getCurrentTest() && (
+            <Button
+              onClick={() => setShowTest(true)}
+              variant={getTestScore(currentModule.id) ? "outline" : "default"}
+              className="w-full"
+              size="lg"
+            >
+              <Play className="h-5 w-5 mr-2" />
+              {getTestScore(currentModule.id) ? 
+                `Retake Test (${getTestScore(currentModule.id)}%)` : 
+                "Take Test"
+              }
+            </Button>
+          )}
 
-            {isModuleCompleted(currentModule.id) && getCurrentTest() && (
-              <Button
-                onClick={() => setShowTest(true)}
-                variant={getTestScore(currentModule.id) ? "outline" : "default"}
-              >
-                {getTestScore(currentModule.id) ? 
-                  `Retake Test (${getTestScore(currentModule.id)}%)` : 
-                  "Take Test"
-                }
-              </Button>
-            )}
+          {/* Certificate Button - Fixed condition */}
+          {isModuleCompleted(currentModule.id) && 
+           getTestScore(currentModule.id) !== null && 
+           getTestScore(currentModule.id)! >= (getCurrentTest()?.passing_score || 70) && 
+           currentModuleIndex === modules.length - 1 && (
+            <Button 
+              onClick={() => setShowCertificate(true)}
+              className="w-full"
+              size="lg"
+              variant="default"
+            >
+              <Award className="h-5 w-5 mr-2" />
+              View Certificate
+            </Button>
+          )}
+
+          {/* Navigation Buttons */}
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentModuleIndex(prev => Math.max(0, prev - 1))}
+              disabled={currentModuleIndex === 0}
+              className="flex-1"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
 
             {isModuleCompleted(currentModule.id) && 
-             getTestScore(currentModule.id) && 
+             getTestScore(currentModule.id) !== null && 
              getTestScore(currentModule.id)! >= (getCurrentTest()?.passing_score || 70) && 
              currentModuleIndex < modules.length - 1 && (
-              <Button onClick={() => setCurrentModuleIndex(prev => prev + 1)}>
-                Next Module
+              <Button 
+                onClick={() => setCurrentModuleIndex(prev => prev + 1)}
+                className="flex-1"
+              >
+                Next
                 <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            )}
-
-            {currentModuleIndex === modules.length - 1 && 
-             isModuleCompleted(currentModule.id) && 
-             getTestScore(currentModule.id) && 
-             getTestScore(currentModule.id)! >= (getCurrentTest()?.passing_score || 70) && (
-              <Button onClick={() => setShowCertificate(true)}>
-                <Award className="h-4 w-4 mr-2" />
-                Get Certificate
               </Button>
             )}
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </MobileLayout>
   );
 };
 

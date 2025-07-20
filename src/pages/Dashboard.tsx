@@ -7,7 +7,8 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
-import { LogOut, BookOpen, Award, Clock } from "lucide-react";
+import { LogOut, BookOpen, Award, Clock, Settings } from "lucide-react";
+import { MobileLayout } from "@/components/MobileLayout";
 
 interface Course {
   id: string;
@@ -134,111 +135,105 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80">
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    <MobileLayout>
+      <div className="p-4 space-y-4">
+        {/* Welcome Section */}
+        <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-primary">Cosmetic Academy</h1>
-            <p className="text-sm text-muted-foreground">Welcome back, {user?.user_metadata?.full_name || user?.email}</p>
+            <h2 className="text-xl font-bold">Welcome back!</h2>
+            <p className="text-sm text-muted-foreground">
+              {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+            </p>
           </div>
-          <Button variant="outline" onClick={handleSignOut}>
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
           </Button>
         </div>
-      </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Progress Overview */}
-          <Card className="md:col-span-2 lg:col-span-3">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Your Learning Progress
-              </CardTitle>
-              <CardDescription>
-                Track your advancement through the cosmetic production course
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Overall Progress</span>
-                  <span className="text-sm text-muted-foreground">{Math.round(getProgressPercentage())}%</span>
-                </div>
-                <Progress value={getProgressPercentage()} className="h-2" />
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{progress.filter(p => p.completed_at).length} modules completed</span>
-                  <span>4 modules total</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Progress Overview */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BookOpen className="h-5 w-5" />
+              Learning Progress
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Overall Progress</span>
+              <span className="text-sm text-muted-foreground">{Math.round(getProgressPercentage())}%</span>
+            </div>
+            <Progress value={getProgressPercentage()} className="h-2" />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{progress.filter(p => p.completed_at).length} completed</span>
+              <span>4 modules total</span>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Available Courses */}
+        {/* Available Courses */}
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Available Courses</h3>
           {courses.map((course) => (
-            <Card key={course.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-lg">{course.title}</CardTitle>
-                <CardDescription>{course.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  {course.duration_hours} hours
-                </div>
-                <div className="flex justify-between items-center">
-                  <Badge variant={getProgressPercentage() === 100 ? "default" : "secondary"}>
-                    {getProgressPercentage() === 100 ? "Completed" : "In Progress"}
-                  </Badge>
-                  <Button 
-                    onClick={() => startCourse(course.id)}
-                    variant={getProgressPercentage() === 100 ? "outline" : "default"}
-                  >
-                    {getProgressPercentage() === 100 ? "Review" : "Continue"}
-                  </Button>
+            <Card key={course.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="font-semibold">{course.title}</h4>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    {course.duration_hours} hours
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <Badge variant={getProgressPercentage() === 100 ? "default" : "secondary"}>
+                      {getProgressPercentage() === 100 ? "Completed" : "In Progress"}
+                    </Badge>
+                    <Button 
+                      onClick={() => startCourse(course.id)}
+                      variant={getProgressPercentage() === 100 ? "outline" : "default"}
+                      size="sm"
+                    >
+                      {getProgressPercentage() === 100 ? "Review" : "Continue"}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-
-          {/* Achievements */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {progress.filter(p => p.completed_at).length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">First Module</Badge>
-                  </div>
-                )}
-                {progress.filter(p => p.completed_at).length >= 2 && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">Halfway There</Badge>
-                  </div>
-                )}
-                {getProgressPercentage() === 100 && (
-                  <div className="flex items-center gap-2">
-                    <Badge>Course Complete</Badge>
-                  </div>
-                )}
-                {progress.filter(p => p.test_score && p.test_score >= 90).length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">High Scorer</Badge>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
-      </main>
-    </div>
+
+        {/* Achievements */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Award className="h-5 w-5" />
+              Achievements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {progress.filter(p => p.completed_at).length > 0 && (
+                <Badge variant="outline" className="text-xs">First Module</Badge>
+              )}
+              {progress.filter(p => p.completed_at).length >= 2 && (
+                <Badge variant="outline" className="text-xs">Halfway There</Badge>
+              )}
+              {getProgressPercentage() === 100 && (
+                <Badge className="text-xs">Course Complete</Badge>
+              )}
+              {progress.filter(p => p.test_score && p.test_score >= 90).length > 0 && (
+                <Badge variant="outline" className="text-xs">High Scorer</Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </MobileLayout>
   );
 };
 

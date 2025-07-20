@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Download, Home } from "lucide-react";
+import { MobileLayout } from "@/components/MobileLayout";
 
 interface CertificateComponentProps {
   userName: string;
@@ -91,58 +92,62 @@ export const CertificateComponent = ({ userName, courseName, onClose }: Certific
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        <Card className="border-4 border-primary/20 shadow-2xl">
-          <CardContent className="p-12 text-center bg-gradient-to-br from-background to-accent/5">
-            <div className="space-y-8">
+    <MobileLayout 
+      showBackButton={true} 
+      backTo="/dashboard"
+      title="Certificate"
+    >
+      <div className="p-4">
+        <Card className="border-4 border-primary/20 shadow-xl">
+          <CardContent className="p-6 text-center bg-gradient-to-br from-background to-accent/5">
+            <div className="space-y-6">
               {/* Header */}
-              <div className="space-y-4">
-                <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Award className="h-10 w-10 text-primary" />
+              <div className="space-y-3">
+                <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Award className="h-8 w-8 text-primary" />
                 </div>
-                <h1 className="text-4xl font-bold text-primary">
+                <h1 className="text-2xl font-bold text-primary">
                   CERTIFICATE OF COMPLETION
                 </h1>
-                <div className="w-32 h-1 bg-primary mx-auto rounded"></div>
+                <div className="w-24 h-1 bg-primary mx-auto rounded"></div>
               </div>
 
               {/* Content */}
-              <div className="space-y-6 text-lg">
+              <div className="space-y-4 text-base">
                 <p className="text-muted-foreground">This is to certify that</p>
                 
-                <h2 className="text-3xl font-bold text-foreground">
+                <h2 className="text-2xl font-bold text-foreground">
                   {userName}
                 </h2>
                 
                 <p className="text-muted-foreground">has successfully completed the</p>
                 
-                <h3 className="text-2xl font-semibold text-primary">
+                <h3 className="text-xl font-semibold text-primary">
                   {courseName}
                 </h3>
                 
-                <p className="text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Demonstrating proficiency in cosmetic science, manufacturing processes,
                   safety standards, and industry regulations.
                 </p>
                 
-                <div className="pt-8">
+                <div className="pt-4">
                   <p className="text-sm text-muted-foreground">
                     Issued on {currentDate}
                   </p>
-                  <p className="text-lg font-semibold text-primary mt-2">
+                  <p className="text-base font-semibold text-primary mt-1">
                     Cosmetic Production Academy
                   </p>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex justify-center gap-4 pt-8">
-                <Button onClick={handleDownload} size="lg">
+              <div className="space-y-3 pt-4">
+                <Button onClick={handleDownload} size="lg" className="w-full">
                   <Download className="h-4 w-4 mr-2" />
                   Download Certificate
                 </Button>
-                <Button variant="outline" onClick={onClose} size="lg">
+                <Button variant="outline" onClick={onClose} size="lg" className="w-full">
                   <Home className="h-4 w-4 mr-2" />
                   Back to Dashboard
                 </Button>
@@ -151,6 +156,6 @@ export const CertificateComponent = ({ userName, courseName, onClose }: Certific
           </CardContent>
         </Card>
       </div>
-    </div>
+    </MobileLayout>
   );
 };
