@@ -21,6 +21,14 @@ interface UserProgress {
   module_id: string;
   completed_at: string | null;
   test_score: number | null;
+  course_id: string;
+}
+
+interface Certificate {
+  id: string;
+  user_id: string;
+  course_id: string;
+  issued_at: string;
 }
 
 const Dashboard = () => {
@@ -28,6 +36,7 @@ const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [progress, setProgress] = useState<UserProgress[]>([]);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -57,6 +66,7 @@ const Dashboard = () => {
     if (user) {
       fetchCourses();
       fetchProgress();
+      fetchCertificates();
     }
   }, [user]);
 
@@ -84,7 +94,7 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from("user_progress")
-        .select("module_id, completed_at, test_score")
+        .select("module_id, completed_at, test_score, course_id")
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -97,6 +107,26 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCertificates = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("certificates")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      setCertificates(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error loading certificates",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -117,10 +147,28 @@ const Dashboard = () => {
     navigate(`/course/${courseId}`);
   };
 
-  const getProgressPercentage = () => {
-    // Assuming 4 modules total
+  const getProgressPercentage = (courseId?: string) => {
+    if (courseId) {
+      // Get progress for specific course
+      const courseProgress = progress.filter(p => p.course_id === courseId);
+      const completedModules = courseProgress.filter(p => p.completed_at).length;
+      // Assuming each course has multiple modules, we'll get total from DB
+      // For now using 4 as default, but should be dynamic based on actual module count
+      return completedModules > 0 ? (completedModules / 4) * 100 : 0;
+    }
+    // Overall progress across all courses
     const completedModules = progress.filter(p => p.completed_at).length;
-    return (completedModules / 4) * 100;
+    return completedModules > 0 ? (completedModules / 20) * 100 : 0; // Total modules across all courses
+  };
+
+  const isCourseCompleted = (courseId: string) => {
+    const courseProgress = progress.filter(p => p.course_id === courseId);
+    const completedModules = courseProgress.filter(p => p.completed_at).length;
+    return completedModules >= 4; // Assuming 4 modules per course
+  };
+
+  const hasCertificate = () => {
+    return certificates.length > 0;
   };
 
   if (loading) {
@@ -135,7 +183,7 @@ const Dashboard = () => {
   }
 
   return (
-    <MobileLayout>
+    <MobileLayout showCertificateButton={hasCertificate()}>
       <div className="p-4 space-y-4">
         {/* Welcome Section */}
         <div className="flex justify-between items-center">
@@ -190,15 +238,15 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex justify-between items-center">
-                    <Badge variant={getProgressPercentage() === 100 ? "default" : "secondary"}>
-                      {getProgressPercentage() === 100 ? "Completed" : "In Progress"}
+                    <Badge variant={isCourseCompleted(course.id) ? "default" : "secondary"}>
+                      {isCourseCompleted(course.id) ? "Completed" : "In Progress"}
                     </Badge>
                     <Button 
                       onClick={() => startCourse(course.id)}
-                      variant={getProgressPercentage() === 100 ? "outline" : "default"}
+                      variant={isCourseCompleted(course.id) ? "outline" : "default"}
                       size="sm"
                     >
-                      {getProgressPercentage() === 100 ? "Review" : "Continue"}
+                      {isCourseCompleted(course.id) ? "Review" : "Continue"}
                     </Button>
                   </div>
                 </div>
@@ -224,7 +272,10 @@ const Dashboard = () => {
                 <Badge variant="outline" className="text-xs">Halfway There</Badge>
               )}
               {getProgressPercentage() === 100 && (
-                <Badge className="text-xs">Course Complete</Badge>
+                <Badge className="text-xs">All Courses Complete</Badge>
+              )}
+              {hasCertificate() && (
+                <Badge variant="outline" className="text-xs">Certificate Earned</Badge>
               )}
               {progress.filter(p => p.test_score && p.test_score >= 90).length > 0 && (
                 <Badge variant="outline" className="text-xs">High Scorer</Badge>
