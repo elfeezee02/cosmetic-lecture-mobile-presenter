@@ -179,6 +179,8 @@ const Course = () => {
           module_id: currentModule.id,
           completed_at: new Date().toISOString(),
           test_score: score,
+        }, {
+          onConflict: "user_id,module_id"
         });
 
       if (error) throw error;
