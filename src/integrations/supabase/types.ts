@@ -16,6 +16,9 @@ export type Database = {
     Tables: {
       certificates: {
         Row: {
+          approved: boolean | null
+          approved_at: string | null
+          approved_by: string | null
           certificate_url: string | null
           course_id: string
           id: string
@@ -23,6 +26,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
           certificate_url?: string | null
           course_id: string
           id?: string
@@ -30,6 +36,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
           certificate_url?: string | null
           course_id?: string
           id?: string
@@ -49,24 +58,30 @@ export type Database = {
       courses: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string | null
           duration_hours: number | null
           id: string
           title: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           duration_hours?: number | null
           id?: string
           title: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           duration_hours?: number | null
           id?: string
           title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -75,28 +90,34 @@ export type Database = {
           content: Json | null
           course_id: string
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           order_index: number
           title: string
+          updated_at: string
         }
         Insert: {
           content?: Json | null
           course_id: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           order_index: number
           title: string
+          updated_at?: string
         }
         Update: {
           content?: Json | null
           course_id?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           order_index?: number
           title?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -141,27 +162,33 @@ export type Database = {
       tests: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           module_id: string
           passing_score: number | null
           questions: Json
           title: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           module_id: string
           passing_score?: number | null
           questions: Json
           title: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           module_id?: string
           passing_score?: number | null
           questions?: Json
           title?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -218,15 +245,42 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -353,6 +407,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
