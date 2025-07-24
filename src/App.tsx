@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Course from "./pages/Course";
 import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
+import AdminAuth from "./pages/AdminAuth";
 import CourseBuilder from "./pages/CourseBuilder";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/course/:courseId" element={<Course />} />
             <Route path="/certificate" element={<Certificate />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/auth" element={<AdminAuth />} />
             <Route path="/admin/course/:courseId" element={<CourseBuilder />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

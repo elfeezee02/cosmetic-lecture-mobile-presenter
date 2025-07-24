@@ -229,6 +229,17 @@ const Auth = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Admin Login Link */}
+        <div className="text-center">
+          <Button 
+            variant="link" 
+            className="text-muted-foreground text-sm"
+            onClick={() => navigate('/admin/auth')}
+          >
+            Administrator Login →
+          </Button>
+        </div>
       </div>
     </div>
   );
