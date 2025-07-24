@@ -43,8 +43,15 @@ const Dashboard = () => {
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/auth");
+      return;
     }
-  }, [user, authLoading, navigate]);
+    
+    // Redirect admin users to admin dashboard
+    if (!authLoading && user && isAdmin) {
+      navigate("/admin");
+      return;
+    }
+  }, [user, authLoading, isAdmin, navigate]);
 
   useEffect(() => {
     if (user) {
